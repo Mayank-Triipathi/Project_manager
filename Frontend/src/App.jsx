@@ -6,7 +6,7 @@ import LoginPage from "./components/login.jsx";
 import Forgot from "./components/forgot-pass.jsx";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from './components/project-dashboard.jsx';
-
+import CreateProject from './components/create-project.jsx';
 function App() {
   return (
     <>
@@ -17,6 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<Forgot />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/create-project" element={<CreateProject />} />
       </Routes>
     </>
   );

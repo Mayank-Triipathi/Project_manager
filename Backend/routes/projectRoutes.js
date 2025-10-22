@@ -17,7 +17,7 @@ router.post("/create", requireAuth("token"), async (req, res) => {
     }
 
     // Create chat for the project
-    const chat = await Chat.create({ project: null, task: null }); 
+    const chat = await Chat.create({ project: true, task: null }); 
 
     // Create project with only creator as initial member
     const project = await Project.create({
@@ -46,8 +46,14 @@ router.get("/:userId/getAll", requireAuth("token"), async (req, res) => {
     // Find projects where user is leader
     const leaderProjects = await Project.find({ leader: userId });
 
-    // Find projects where user is a team member
-    const memberProjects = await Project.find({ teamMembers: userId });
+    // Get leader project IDs to exclude from member list
+    const leaderProjectIds = leaderProjects.map(p => p._id.toString());
+
+    // Find projects where user is a team member but not a leader
+    const memberProjects = await Project.find({
+      teamMembers: userId,
+      _id: { $nin: leaderProjectIds } // Exclude intersection
+    });
 
     res.json({
       success: true,
@@ -59,6 +65,7 @@ router.get("/:userId/getAll", requireAuth("token"), async (req, res) => {
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 });
+
 
 
 

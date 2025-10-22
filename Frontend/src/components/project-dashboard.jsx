@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, LogOut, Moon, Sun, Users, Calendar, Zap, AlertCircle } from "lucide-react"
+import { useNavigate } from "react-router-dom";
 
 export default function ProjectDashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -23,7 +25,7 @@ export default function ProjectDashboard() {
           setError("Authentication required. Please log in.")
           return
         }
-        
+
         const response = await fetch(`http://localhost:5000/api/projects/${userId}/getAll`, {
             headers: {
                 Authorization: `Bearer ${token}`, // <- this is standard
@@ -125,7 +127,7 @@ export default function ProjectDashboard() {
                     : "bg-gradient-to-br from-blue-600 to-purple-700"
                 }`}
               >
-                PM
+                PH
               </div>
               <span className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>ProjectHub</span>
             </motion.div>
@@ -190,6 +192,19 @@ export default function ProjectDashboard() {
                   }`}
                 >
                   <LogOut size={20} />
+                </motion.button>
+                <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/create-project")}
+                className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors ${
+                    isDark
+                    ? "bg-blue-600 text-white hover:bg-blue-500"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+                >
+                <Zap size={18} />
+                Create Project
                 </motion.button>
               </div>
             </div>
