@@ -29,7 +29,7 @@ const projectSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "users"
     }],
-    createdBy: {
+    leader: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "users",
         required: true

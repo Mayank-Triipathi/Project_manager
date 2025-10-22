@@ -31,7 +31,7 @@ export default function Navbar() {
             <Link to="#pricing" className="text-foreground/70 hover:text-foreground transition-colors">
               Pricing
             </Link>
-            <Link to="#" className="text-foreground/70 hover:text-foreground transition-colors">
+            <Link to="/login" className="text-foreground/70 hover:text-foreground transition-colors">
               Login
             </Link>
           </div>

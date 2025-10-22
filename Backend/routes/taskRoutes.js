@@ -4,7 +4,7 @@ const { Project } = require("../models/projectSchema");
 const { requireAuth } = require("../middlewares/auth");
 const router = Router();
 
-router.post("/projects/:projectId/tasks", requireAuth("token"), async (req, res) => {
+router.post("/:projectId/tasks", requireAuth("token"), async (req, res) => {
   try {
     const { projectId } = req.params;
     const { title, description, dueDate, priority, assignedTo } = req.body;
@@ -34,7 +34,7 @@ router.post("/projects/:projectId/tasks", requireAuth("token"), async (req, res)
   }
 });
 
-router.get("/projects/:projectId/tasks", requireAuth("token"), async (req, res) => {
+router.get("/:projectId/tasks", requireAuth("token"), async (req, res) => {
   try {
     const { projectId } = req.params;
 
@@ -50,7 +50,7 @@ router.get("/projects/:projectId/tasks", requireAuth("token"), async (req, res) 
 });
 
 
-router.put("/tasks/:taskId", requireAuth("token"), async (req, res) => {
+router.put("/:taskId", requireAuth("token"), async (req, res) => {
   try {
     const { taskId } = req.params;
     const { title, description, status, dueDate, priority, assignedTo } = req.body;
@@ -81,7 +81,7 @@ router.put("/tasks/:taskId", requireAuth("token"), async (req, res) => {
 });
 
 
-router.delete("/tasks/:taskId", requireAuth("token"), async (req, res) => {
+router.delete("/:taskId", requireAuth("token"), async (req, res) => {
   try {
     const { taskId } = req.params;
     const task = await Task.findById(taskId);
@@ -100,7 +100,7 @@ router.delete("/tasks/:taskId", requireAuth("token"), async (req, res) => {
   }
 });
 
-router.get("/tasks/:taskId", requireAuth("token"), async (req, res) => {
+router.get("/:taskId", requireAuth("token"), async (req, res) => {
   try {
     const { taskId } = req.params;
     const task = await Task.findById(taskId)

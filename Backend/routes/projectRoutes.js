@@ -38,6 +38,28 @@ router.post("/create", requireAuth("token"), async (req, res) => {
   }
 });
 
+// GET /users/:userId/projects
+router.get("/:userId/getAll", requireAuth("token"), async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find projects where user is leader
+    const leaderProjects = await Project.find({ leader: userId });
+
+    // Find projects where user is a team member
+    const memberProjects = await Project.find({ teamMembers: userId });
+
+    res.json({
+      success: true,
+      leaderProjects,
+      memberProjects,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch projects" });
+  }
+});
+
 
 
 

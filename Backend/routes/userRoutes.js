@@ -114,7 +114,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password required" });
     }
 
-    const token = await User.matchuserandgettoken(email, password);
+    const token = await User.matchuserandgettoken(email,password);
     const user = await User.findOne({ email }).select("-password -salt");
 
     res.json({ success: true, token, user });
@@ -140,9 +140,10 @@ router.post("/forgot-password", async (req, res) => {
 
     await OTP.findOneAndUpdate(
   { email },
-  { fullname, username, email, otp, createdAt: new Date() },
+  { email, otp, createdAt: new Date() },
   { upsert: true, new: true }
 );
+
 
     await sendOtp(email, otp);
 
