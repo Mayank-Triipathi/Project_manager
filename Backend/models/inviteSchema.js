@@ -24,6 +24,10 @@ const inviteSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  seen: {
+    type: Boolean,
+    default: false
   }
 });
 

@@ -3,6 +3,7 @@ const { Task } = require("../models/taskSchema");
 const { Project } = require("../models/projectSchema");
 const { requireAuth } = require("../middlewares/auth");
 const router = Router();
+const { Chat } = require("../models/chatSchema");
 
 router.post("/:projectId/tasks", requireAuth("token"), async (req, res) => {
   try {
@@ -14,19 +15,22 @@ router.post("/:projectId/tasks", requireAuth("token"), async (req, res) => {
     if (!project) return res.status(404).json({ error: "Project not found" });
 
     // Only project creator or team members can create tasks
-    if (!project.teamMembers.includes(req.user._id) && !project.createdBy.equals(req.user._id)) {
+    if (!project.createdBy.equals(req.user._id)) {
       return res.status(403).json({ error: "Not authorized to create tasks in this project" });
     }
-
+    const chat =  await Chat.create({ participants: assignedTo, isGroupChat: true });
+    await chat.save();
     const task = await Task.create({
       title,
       description,
       dueDate,
       priority,
       project: projectId,
-      assignedTo: assignedTo || []
+      assignedTo: assignedTo || [],
+      chat: chat._id  
     });
-
+    project.tasks.push(task._id);
+    await project.save();
     res.json({ success: true, task });
   } catch (err) {
     console.error(err);
@@ -60,7 +64,7 @@ router.put("/:taskId", requireAuth("token"), async (req, res) => {
 
     // Check if user is allowed
     const project = await Project.findById(task.project);
-    if (!task.assignedTo.includes(req.user._id) && !project.createdBy.equals(req.user._id)) {
+    if (!project.createdBy.equals(req.user._id)) {
       return res.status(403).json({ error: "Not authorized to update this task" });
     }
 
@@ -118,5 +122,28 @@ router.get("/:taskId", requireAuth("token"), async (req, res) => {
     res.status(500).json({ error: "Failed to fetch task" });
   }
 });
+
+router.get("/user/tasks/:projectId", requireAuth("token"), async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+    if (!project) return res.status(404).json({ error: "Project not found" });
+
+    // If user is project creator → show all tasks in this project
+    if (req.user._id.toString() === project.createdBy.toString()) {
+      const tasks = await Task.find({ project: project._id });
+      return res.json({ success: true, tasks });
+    }
+
+    // Otherwise → show only user's assigned tasks within this project
+    const tasks = await Task.find({ project: project._id, assignedTo: req.user._id });
+    res.json({ success: true, tasks });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch user tasks" });
+  }
+});
+
 
 module.exports = { router };

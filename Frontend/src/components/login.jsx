@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn, Moon, Sun, Loader, CheckCircle, AlertCircle } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
+import socket from '../socket';
 const Input = ({ icon: Icon, label, type = "text", value, onChange, error, showPassword, onTogglePassword, ...props }) => {
   const [focused, setFocused] = useState(false);
   
@@ -215,7 +215,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/users/login", {
+      const response = await fetch("http://localhost:8000/api/users/login", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ export default function LoginPage() {
         } else {
           localStorage.removeItem('rememberedEmail');
         }
-        
+        socket.connect();
         showAlert('success', `Welcome back, ${data.user?.name || 'User'}!`);
         
         setTimeout(() => {

@@ -34,9 +34,9 @@ const projectSchema = new mongoose.Schema({
         ref: "users",
         required: true
     },
-    pendingInvites: [{ // new field
+    tasks: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "users"
+        ref: "tasks"
     }],
     chat: {
         type: mongoose.Schema.Types.ObjectId,

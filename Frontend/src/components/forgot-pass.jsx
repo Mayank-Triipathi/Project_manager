@@ -326,7 +326,7 @@ export default function ForgotPasswordFlow() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/forgot-password', {
+      const response = await fetch('http://localhost:8000/api/users/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -355,7 +355,7 @@ export default function ForgotPasswordFlow() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/forgot-password/verify-otp', {
+      const response = await fetch('http://localhost:8000/api/users/forgot-password/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -385,7 +385,7 @@ export default function ForgotPasswordFlow() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/forgot-password/reset', {
+      const response = await fetch('http://localhost:8000/api/users/forgot-password/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

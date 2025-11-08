@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, LogOut, Moon, Sun, Users, Calendar, Zap, AlertCircle } from "lucide-react"
-import { useNavigate } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 export default function ProjectDashboard() {
   const navigate = useNavigate();
@@ -13,6 +13,9 @@ export default function ProjectDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isDark, setIsDark] = useState(false)
   const [userName, setUserName] = useState("User")
+  const [invites, setInvites] = useState([]); // list of invite objects
+  const [hasNewInvite, setHasNewInvite] = useState(false);
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -26,7 +29,7 @@ export default function ProjectDashboard() {
           return
         }
 
-        const response = await fetch(`http://localhost:5000/api/projects/${userId}/getAll`, {
+        const response = await fetch(`http://localhost:8000/api/projects/${userId}/getAll`, {
             headers: {
                 Authorization: `Bearer ${token}`, // <- this is standard
             },
@@ -50,6 +53,30 @@ export default function ProjectDashboard() {
 
     fetchProjects()
   }, [])
+  const fetchInvites = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    if (!token || !userId) return;
+
+    const response = await fetch(`http://localhost:8000/api/invites/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      setInvites(result);
+      if (Array.isArray(result.invites) && result.invites.some(invite => !invite.seen)) {
+        setHasNewInvite(true);
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching invites:", err);
+  }
+};
+
+fetchInvites();
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -193,6 +220,23 @@ export default function ProjectDashboard() {
                 >
                   <LogOut size={20} />
                 </motion.button>
+                {/* Invites Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate("/invites")}
+                  className={`relative px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors ${
+                    isDark
+                      ? "bg-purple-600 text-white hover:bg-purple-500"
+                      : "bg-purple-500 text-white hover:bg-purple-600"
+                  }`}
+                >
+                  <Users size={18} />
+                  Invites
+                  {hasNewInvite && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
+                  )}
+                </motion.button>
                 <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -290,23 +334,24 @@ export default function ProjectDashboard() {
                 </div>
 
                 <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                >
-                  <AnimatePresence>
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
                     {filterProjects(data.leaderProjects).map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        isLeader={true}
-                        isDark={isDark}
-                        cardVariants={cardVariants}
-                      />
+                      <Link key={project._id} to={`/project/${project._id}`}>
+                        <ProjectCard
+                          project={project}
+                          isLeader={true}
+                          isDark={isDark}
+                          cardVariants={cardVariants}
+                        />
+                      </Link>
                     ))}
-                  </AnimatePresence>
                 </motion.div>
+
+
 
                 {filterProjects(data.leaderProjects).length === 0 && (
                   <motion.div
@@ -345,18 +390,19 @@ export default function ProjectDashboard() {
                   animate="visible"
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                  <AnimatePresence>
-                    {filterProjects(data.memberProjects).map((project) => (
+                  {filterProjects(data.memberProjects).map((project) => (
+                    <Link key={project._id} to={`/project/${project._id}`}>
                       <ProjectCard
-                        key={project.id}
                         project={project}
                         isLeader={false}
                         isDark={isDark}
                         cardVariants={cardVariants}
                       />
-                    ))}
-                  </AnimatePresence>
+                    </Link>
+                  ))}
                 </motion.div>
+
+
 
                 {filterProjects(data.memberProjects).length === 0 && (
                   <motion.div

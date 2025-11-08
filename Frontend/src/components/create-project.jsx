@@ -82,7 +82,7 @@ const [darkMode, setDarkMode] = useState(false)
         return
       }
 
-      const response = await fetch("http://localhost:5000/api/projects/create", {
+      const response = await fetch("http://localhost:8000/api/projects/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
