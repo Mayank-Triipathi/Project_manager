@@ -10,7 +10,7 @@ import CreateProject from './components/create-project.jsx';
 import Project from './components/project.jsx';
 import InvitesPage from './components/InvitesPage.jsx';
 import AddTask from './components/tasks.jsx';
-import Chat from './components/Chat.jsx';
+import Chat from './components/chat.jsx';
 import MemberStats from './components/memberStats';
 // 🧩 Import the shared socket instance
 import socket from './socket';
