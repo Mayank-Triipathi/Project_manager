@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import React from "react";
-import { Button } from "./ui/Button"; // relative path
+import { Button } from "./ui/button"; // relative path
 import { Link } from "react-router-dom"; // if you’re using React Router
 const API = import.meta.env.VITE_API_BASE_URL;
 
