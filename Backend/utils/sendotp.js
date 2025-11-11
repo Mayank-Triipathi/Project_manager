@@ -2,7 +2,7 @@ const { Resend } = require("resend");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendOtp(email, otp) {
+async function sendOtp(email, otp) {
   try {
     await resend.emails.send({
       from: "Project Manager <onboarding@resend.dev>", // default Resend sender
@@ -22,6 +22,5 @@ export async function sendOtp(email, otp) {
     console.error("❌ Error sending OTP email:", err);
   }
 }
-
 
 module.exports = { sendOtp };
