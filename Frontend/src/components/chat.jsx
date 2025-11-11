@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, FileText, CheckCheck, Check, Users, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const Chat = ({ socket }) => {
   const { chatId } = useParams();
@@ -128,9 +129,9 @@ const Chat = ({ socket }) => {
       }, 10000);
 
       console.log('Fetching chat:', chatId);
-      
-      const chatResponse = await fetch(`http://localhost:8000/api/chats/${chatId}`, {
-        headers: { 
+
+      const chatResponse = await fetch(`${API}/api/chats/${chatId}`, {
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
@@ -157,7 +158,7 @@ const Chat = ({ socket }) => {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/chats/${chatId}/messages`, {
+      const response = await fetch(`${API}/api/chats/${chatId}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -189,7 +190,7 @@ const Chat = ({ socket }) => {
     try {
       await Promise.all(
         messageIds.map(msgId =>
-          fetch(`http://localhost:8000/api/messages/${msgId}/read`, {
+          fetch(`${API}/api/messages/${msgId}/read`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -225,7 +226,7 @@ const Chat = ({ socket }) => {
     try {
       setSending(true);
       const response = await fetch(
-        `http://localhost:8000/api/chats/${chatId}/messages`,
+        `${API}/api/chats/${chatId}/messages`,
         {
           method: 'POST',
           headers: {
@@ -261,7 +262,7 @@ const Chat = ({ socket }) => {
     try {
       setUploadingFile(true);
       const response = await fetch(
-        `http://localhost:8000/api/chats/${chatId}/messages`,
+        `${API}/api/chats/${chatId}/messages`,
         {
           method: 'POST',
           headers: {

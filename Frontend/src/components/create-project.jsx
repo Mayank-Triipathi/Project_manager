@@ -6,7 +6,7 @@ import React, { useState } from "react"
 
 import { motion } from "framer-motion"
 import { Loader2, CheckCircle, AlertCircle, Sun, Moon } from "lucide-react"
-
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function CreateProject() {
   // Form state
@@ -82,7 +82,7 @@ const [darkMode, setDarkMode] = useState(false)
         return
       }
 
-      const response = await fetch("http://localhost:8000/api/projects/create", {
+      const response = await fetch(`${API}/api/projects/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

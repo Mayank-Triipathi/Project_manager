@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mail, User, UserCircle, ArrowRight, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import { Lock } from 'lucide-react';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 // Reusable Input Component
 const Input = ({ icon: Icon, label, type = "text", value, onChange, error, ...props }) => {
@@ -214,7 +215,7 @@ export default function SignupPage() {
 
     
     try {
-          const response = await fetch("http://localhost:8000/api/users/signup", {
+          const response = await fetch(`${API}/api/users/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
@@ -245,7 +246,7 @@ export default function SignupPage() {
     setLoading(true);
     
     try {
-      const response = await fetch("http://localhost:8000/api/users/verify-otp", {
+      const response = await fetch(`${API}/api/users/verify-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: formData.email, otp }),
@@ -275,7 +276,7 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/users/set-password", {
+      const response = await fetch(`${API}/api/users/set-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password, resetToken }) // pass the OTP token from verify step

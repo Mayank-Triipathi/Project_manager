@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Check, X, Mail, Inbox, Sparkles, UserPlus, Loader } from 'lucide-react';
-
+const API = import.meta.env.VITE_API_BASE_URL;
 // API Helper Functions
 const api = {
     
   fetchInvites: async () => {
     const token = localStorage.getItem("token");
-    const response = await fetch('http://localhost:8000/api/invites/me', { credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
+    const response = await fetch(`${API}/api/invites/me`, { credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
     return { data: await response.json() };
   },
   
   acceptInvite: async (id) => {
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:8000/api/invites/${id}/accept`, { method: 'POST', credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
+    await fetch(`${API}/api/invites/${id}/accept`, { method: 'POST', credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
     return { success: true };
   },
   
   declineInvite: async (id) => {
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:8000/api/invites/${id}`, { method: 'DELETE', credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
+    await fetch(`${API}/api/invites/${id}`, { method: 'DELETE', credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
     return { success: true };
   }
 };

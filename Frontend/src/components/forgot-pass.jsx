@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, AlertCircle, Loader, Moon, Sun, KeyRound } from 'lucide-react';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const Input = ({ icon: Icon, label, type = "text", value, onChange, error, ...props }) => {
   const [focused, setFocused] = useState(false);
@@ -326,7 +327,7 @@ export default function ForgotPasswordFlow() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/forgot-password', {
+      const response = await fetch(`${API}/api/users/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -355,7 +356,7 @@ export default function ForgotPasswordFlow() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/forgot-password/verify-otp', {
+      const response = await fetch(`${API}/api/users/forgot-password/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -385,7 +386,7 @@ export default function ForgotPasswordFlow() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/forgot-password/reset', {
+      const response = await fetch(`${API}/api/users/forgot-password/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

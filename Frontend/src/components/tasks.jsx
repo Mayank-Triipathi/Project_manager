@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Calendar, Flag, Users, Edit2, Trash2, Check, AlertCircle, Clock } from 'lucide-react';
 import { useParams } from 'react-router-dom';
-const API_URL = 'http://localhost:8000/api';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 // Toast Component
 const Toast = ({ message, type, onClose }) => (
@@ -102,7 +102,7 @@ const TaskFormModal = ({ isOpen, onClose, projectId, task, onSuccess, teamMember
       const token = localStorage.getItem('token');
       let response;
       if(task) {
-        response = await fetch(`${API_URL}/tasks/${task._id}`, {
+        response = await fetch(`${API}/tasks/${task._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const TaskFormModal = ({ isOpen, onClose, projectId, task, onSuccess, teamMember
           body: JSON.stringify(formData)
         });
       } else {
-        response = await fetch(`${API_URL}/tasks/${projectId}/tasks`, {
+        response = await fetch(`${API}/tasks/${projectId}/tasks`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -477,7 +477,7 @@ export default function TaskManagementModal({ projectId, initialTasks = [] }) {
   const loadTeamMembers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/projects/teamMembers/${projectId}`, {
+      const response = await fetch(`${API}/projects/teamMembers/${projectId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -490,7 +490,7 @@ export default function TaskManagementModal({ projectId, initialTasks = [] }) {
   const loadTasks = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/tasks/${projectId}/tasks`, {
+      const response = await fetch(`${API}/tasks/${projectId}/tasks`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -519,7 +519,7 @@ export default function TaskManagementModal({ projectId, initialTasks = [] }) {
     setIsDeleting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/tasks/${selectedTask._id}`, {
+      const response = await fetch(`${API}/tasks/${selectedTask._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -3,6 +3,8 @@ import { Mail, Lock, Eye, EyeOff, LogIn, Moon, Sun, Loader, CheckCircle, AlertCi
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import socket from '../socket';
+const API = import.meta.env.VITE_API_BASE_URL;
+
 const Input = ({ icon: Icon, label, type = "text", value, onChange, error, showPassword, onTogglePassword, ...props }) => {
   const [focused, setFocused] = useState(false);
   
@@ -215,7 +217,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/users/login", {
+      const response = await fetch(`${API}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

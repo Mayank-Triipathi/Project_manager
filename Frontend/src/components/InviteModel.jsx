@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Loader2 } from "lucide-react";
 import axios from "axios";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const InviteModal = ({ isOpen, onClose, projectId }) => {
 
@@ -15,7 +16,7 @@ const InviteModal = ({ isOpen, onClose, projectId }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:8000/api/invites/invite",
+        `${API}/api/invites/invite`,
         { projectId, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );

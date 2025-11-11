@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Users, CheckCircle, Clock, Plus, UserPlus, Briefcase, ChevronDown, MessageCircle, BarChart3 } from 'lucide-react';
 import InviteModal from './InviteModel.jsx';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -21,7 +22,7 @@ const ProjectDetails = () => {
     const fetchProject = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
+        const response = await fetch(`${API}/api/projects/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -49,7 +50,7 @@ const ProjectDetails = () => {
       
       try {
         setLoadingUserTasks(true);
-        const response = await fetch(`http://localhost:8000/api/tasks/user/tasks/${id}`, {
+        const response = await fetch(`${API}/api/tasks/user/tasks/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -73,7 +74,7 @@ const ProjectDetails = () => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+      const response = await fetch(`${API}/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,7 +102,7 @@ const ProjectDetails = () => {
   const handleChatWithLeader = async (leaderId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/chats/message-personal/${project._id}/${leaderId}`,
+        `${API}/api/chats/message-personal/${project._id}/${leaderId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

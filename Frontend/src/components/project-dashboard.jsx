@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, LogOut, Moon, Sun, Users, Calendar, Zap, AlertCircle } from "lucide-react"
 import { Link,useNavigate } from "react-router-dom";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function ProjectDashboard() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function ProjectDashboard() {
           return
         }
 
-        const response = await fetch(`http://localhost:8000/api/projects/${userId}/getAll`, {
+        const response = await fetch(`${API}/api/projects/${userId}/getAll`, {
             headers: {
                 Authorization: `Bearer ${token}`, // <- this is standard
             },
@@ -60,7 +61,7 @@ export default function ProjectDashboard() {
 
     if (!token || !userId) return;
 
-    const response = await fetch(`http://localhost:8000/api/invites/me`, {
+    const response = await fetch(`${API}/api/invites/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

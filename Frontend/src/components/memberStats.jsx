@@ -9,6 +9,7 @@ import {
   MessageCircle,
   User
 } from 'lucide-react';
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const MemberStats = () => {
   const { projectId, memberId } = useParams();
@@ -40,7 +41,7 @@ const MemberStats = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:8000/api/projects/${projectId}/${memberId}/stats`,
+        `${API}/api/projects/${projectId}/${memberId}/stats`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -89,7 +90,7 @@ const MemberStats = () => {
   const handleMessagePersonally = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/chats/message-personal/${projectId}/${memberId}`, 
+        `${API}/api/chats/message-personal/${projectId}/${memberId}`, 
         {
           headers: { 
             'Authorization': `Bearer ${token}` 
