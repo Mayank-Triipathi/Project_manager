@@ -44,28 +44,54 @@ router.get("/:userId/getAll", requireAuth("token"), async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Find projects where user is leader
-    const leaderProjects = await Project.find({ createdBy: userId });
+    // 1️⃣ Find projects where user is leader
+    const leaderProjects = await Project.find({ createdBy: userId })
+      .populate("tasks", "status"); // only populate task status
 
-    // Get leader project IDs to exclude from member list
+    // 2️⃣ Find projects where user is a member but not leader
     const leaderProjectIds = leaderProjects.map(p => p._id.toString());
-
-    // Find projects where user is a team member but not a leader
     const memberProjects = await Project.find({
       teamMembers: userId,
-      _id: { $nin: leaderProjectIds } // Exclude intersection
-    });
+      _id: { $nin: leaderProjectIds },
+    }).populate("tasks", "status");
+
+    // 3️⃣ Compute completion status
+    const computeProjectCompletion = (projects) => {
+      return projects.map(project => {
+        const totalTasks = project.tasks?.length || 0;
+        const completedTasks = project.tasks?.filter(t => t.status === "Done").length || 0;
+
+        // Project done if all tasks are completed
+        const isDone = totalTasks > 0 && completedTasks === totalTasks;
+
+        // Progress percentage
+        const progress =
+          totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+        return {
+          ...project.toObject(),
+          totalTasks,
+          completedTasks,
+          progress,
+          isDone,
+        };
+      });
+    };
+
+    const leaderWithProgress = computeProjectCompletion(leaderProjects);
+    const memberWithProgress = computeProjectCompletion(memberProjects);
 
     res.json({
       success: true,
-      leaderProjects,
-      memberProjects,
+      leaderProjects: leaderWithProgress,
+      memberProjects: memberWithProgress,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 });
+
 
 router.get("/:id", requireAuth(), async (req, res) => {
   try {

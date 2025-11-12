@@ -4,10 +4,12 @@ import { useState } from "react"
 import React from "react";
 import { Button } from "./ui/button"; // relative path
 import { Link } from "react-router-dom"; // if you’re using React Router
+import {useNavigate} from 'react-router-dom';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -22,15 +24,13 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <Link to="#" className="text-foreground/70 hover:text-foreground transition-colors">
+            <Link to="/" className="text-foreground/70 hover:text-foreground transition-colors">
               Home
             </Link>
-            <Link to="#features" className="text-foreground/70 hover:text-foreground transition-colors">
+            <Link to="/feature-page" className="text-foreground/70 hover:text-foreground transition-colors">
               Features
             </Link>
-            <Link to="#pricing" className="text-foreground/70 hover:text-foreground transition-colors">
-              Pricing
-            </Link>
+            
             <Link to="/login" className="text-foreground/70 hover:text-foreground transition-colors">
               Login
             </Link>
@@ -38,15 +38,16 @@ export default function Navbar() {
 
           {/* CTA Button */}
           <div className="hidden md:flex gap-3">
-            <Link to="/signin">
+            <Link to="/signup">
               <Button variant="outline" className="border-border hover:bg-muted bg-transparent">
-                Sign In
+                Sign Up
               </Button>
             </Link>
-
-            <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
-              Get Started
-            </Button>
+            <Link to="/signup">
+              <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
+                Get Started
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -69,9 +70,11 @@ export default function Navbar() {
             <Link to="#pricing" className="block px-3 py-2 text-foreground/70 hover:text-foreground">
               Pricing
             </Link>
+            <Link to="/login">
             <Button className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
               Get Started
             </Button>
+            </Link>
           </div>
         )}
       </div>

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import analyticsImg1 from "@/images/homepage_analytics.png"
+import {Link} from "react-router-dom"
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
@@ -42,12 +43,14 @@ export default function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Link to="/login">
               <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground text-base h-12 px-8">
                 Get Started Free
               </Button>
-              <Button variant="outline" className="border-border hover:bg-muted text-base h-12 px-8 bg-transparent">
+              </Link>
+              {/* <Button variant="outline" className="border-border hover:bg-muted text-base h-12 px-8 bg-transparent">
                 Watch Demo
-              </Button>
+              </Button> */}
             </div>
 
             <p className="text-sm text-foreground/50 pt-4">No credit card required. Start free for 14 days.</p>

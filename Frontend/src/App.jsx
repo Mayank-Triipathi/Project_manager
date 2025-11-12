@@ -1,7 +1,7 @@
 import './App.css'
 import Navbar from './components/navbar.jsx'
 import Home from './app/Home'
-import SigninPage from "./components/signin.jsx"; 
+import SignupPage from "./components/signup.jsx"; 
 import LoginPage from "./components/login.jsx";
 import Forgot from "./components/forgot-pass.jsx";
 import { Routes, Route } from "react-router-dom";
@@ -12,6 +12,7 @@ import InvitesPage from './components/InvitesPage.jsx';
 import AddTask from './components/tasks.jsx';
 import Chat from './components/chat.jsx';
 import MemberStats from './components/memberStats';
+import FeaturesPage from './components/project-features';
 // 🧩 Import the shared socket instance
 import socket from './socket';
 import { useEffect } from 'react';
@@ -37,10 +38,10 @@ function App() {
 
   return (
     <>
-      <Navbar /> {/* stays visible on all pages */}
+      {/* <Navbar /> stays visible on all pages */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/signin" element={<SigninPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<Forgot />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -50,6 +51,7 @@ function App() {
         <Route path="/AddTask/:projectId" element={<AddTask />} />
         <Route path="/chat/:chatId" element={<Chat socket={socket} />} />
         <Route path="/member-stats/:projectId/:memberId" element={<MemberStats />} />
+        <Route path="/feature-page" element={<FeaturesPage/>}/>
       </Routes>
     </>
   );

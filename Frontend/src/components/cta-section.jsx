@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function CTASection() {
@@ -29,11 +30,11 @@ export default function CTASection() {
           <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
             Join thousands of teams already using TaskSync to deliver projects faster and collaborate better.
           </p>
-
+          <Link to="/signup">
           <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground text-lg h-14 px-10">
             Sign Up Free
           </Button>
-
+          </Link>
           <p className="text-sm text-foreground/50">14-day free trial. No credit card required. Cancel anytime.</p>
         </div>
       </div>

@@ -33,6 +33,7 @@ const {router: chatRoutes} = require("./routes/chatRoutes.js");
 const allowedOrigins = [
   "http://localhost:5173",
   "https://projectmanager-frontend-h33lzflzh-minkut2005-3282s-projects.vercel.app",
+  "https://projectmanager-frontend-kappa.vercel.app",
 ];
 
 const corsOptions = {

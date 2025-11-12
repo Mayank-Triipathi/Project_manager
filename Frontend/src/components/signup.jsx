@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mail, User, UserCircle, ArrowRight, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import { Lock } from 'lucide-react';
+import Navbar from "./navbar.jsx"
 const API = import.meta.env.VITE_API_BASE_URL;
 
 // Reusable Input Component
@@ -298,6 +299,8 @@ export default function SignupPage() {
   };
   
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 
       flex items-center justify-center p-4 relative overflow-hidden">
       
@@ -484,5 +487,7 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+    </>
   );
+
 }

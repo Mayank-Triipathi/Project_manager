@@ -41,6 +41,8 @@ export default function ProjectDashboard() {
         }
 
         const result = await response.json()
+        console.log("Leader projects:", result.leaderProjects);
+        console.log("Member projects:", result.memberProjects);
         setData(result)
 
         const storedName = localStorage.getItem("userName")
@@ -54,30 +56,33 @@ export default function ProjectDashboard() {
 
     fetchProjects()
   }, [])
-  const fetchInvites = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
+  
+  useEffect(() => {
+    const fetchInvites = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("userId");
 
-    if (!token || !userId) return;
+        if (!token || !userId) return;
 
-    const response = await fetch(`${API}/api/invites/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+        const response = await fetch(`${API}/api/invites/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    if (response.ok) {
-      const result = await response.json();
-      setInvites(result);
-      if (Array.isArray(result.invites) && result.invites.some(invite => !invite.seen)) {
-        setHasNewInvite(true);
+        if (response.ok) {
+          const result = await response.json();
+          setInvites(result);
+          if (Array.isArray(result.invites) && result.invites.some(invite => !invite.seen)) {
+            setHasNewInvite(true);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching invites:", err);
       }
-    }
-  } catch (err) {
-    console.error("Error fetching invites:", err);
-  }
-};
+    };
 
-fetchInvites();
+    fetchInvites();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -340,7 +345,9 @@ fetchInvites();
                     animate="visible"
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                   >
-                    {filterProjects(data.leaderProjects).map((project) => (
+                    {filterProjects(data.leaderProjects)
+                      .sort((a, b) => (a.isDone ? 1 : 0) - (b.isDone ? 1 : 0))
+                      .map((project) => (
                       <Link key={project._id} to={`/project/${project._id}`}>
                         <ProjectCard
                           project={project}
@@ -351,8 +358,6 @@ fetchInvites();
                       </Link>
                     ))}
                 </motion.div>
-
-
 
                 {filterProjects(data.leaderProjects).length === 0 && (
                   <motion.div
@@ -391,7 +396,9 @@ fetchInvites();
                   animate="visible"
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                  {filterProjects(data.memberProjects).map((project) => (
+                  {filterProjects(data.memberProjects)
+                    .sort((a, b) => (a.isDone ? 1 : 0) - (b.isDone ? 1 : 0))
+                    .map((project) => (
                     <Link key={project._id} to={`/project/${project._id}`}>
                       <ProjectCard
                         project={project}
@@ -402,8 +409,6 @@ fetchInvites();
                     </Link>
                   ))}
                 </motion.div>
-
-
 
                 {filterProjects(data.memberProjects).length === 0 && (
                   <motion.div
@@ -452,12 +457,12 @@ function ProjectCard({ project, isLeader, isDark, cardVariants }) {
         isDark
           ? "bg-slate-900 border-slate-800 hover:border-slate-700"
           : "bg-white border-slate-200 hover:border-slate-300"
-      }`}
+      } ${project.isDone ? (isDark ? 'opacity-70' : 'opacity-60') : ''}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-slate-900"}`}>{project.name}</h3>
             {isLeader && (
               <span
@@ -466,6 +471,24 @@ function ProjectCard({ project, isLeader, isDark, cardVariants }) {
                 }`}
               >
                 Leader
+              </span>
+            )}
+            {!isLeader && (
+              <span
+                className={`px-2 py-1 rounded text-xs font-semibold ${
+                  isDark ? "bg-purple-950 text-purple-300" : "bg-purple-100 text-purple-700"
+                }`}
+              >
+                Member
+              </span>
+            )}
+            {project.isDone && (
+              <span
+                className={`px-2 py-1 rounded text-xs font-semibold ${
+                  isDark ? "bg-green-950 text-green-300" : "bg-green-100 text-green-700"
+                }`}
+              >
+                ✓ Completed
               </span>
             )}
           </div>
