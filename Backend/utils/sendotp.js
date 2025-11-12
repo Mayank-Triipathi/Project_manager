@@ -26,8 +26,9 @@ async function sendOtp(email, otp) {
 
     console.log("✅ OTP email sent via Brevo:", response);
   } catch (err) {
-    console.error("❌ Error sending OTP via Brevo:", err.message);
-  }
+  console.error("❌ Error sending OTP via Brevo:");
+  console.dir(err, { depth: null }); // this prints full nested response
 }
+};
 
 module.exports = { sendOtp };
