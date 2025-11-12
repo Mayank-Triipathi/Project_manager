@@ -8,6 +8,8 @@ brevo.setApiKey(
 
 async function sendOtp(email, otp) {
   try {
+    console.log("BREVO API Key starts with:", process.env.BREVO_API_KEY?.slice(0, 10));
+
     const response = await brevo.sendTransacEmail({
       sender: { name: "Project Manager", email: "minkut2005@gmail.com" },
       to: [{ email }],
