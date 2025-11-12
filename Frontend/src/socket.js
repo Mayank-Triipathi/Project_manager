@@ -1,8 +1,9 @@
 import { io } from "socket.io-client";
 
-const socket = io(`http://localhost:8000`, {
+const socket = io(import.meta.env.VITE_API_BASE_URL, {
   withCredentials: true,
-  autoConnect: false, // we will manually connect after login
+  autoConnect: false,
+  transports: ["websocket"], // ensures faster, reliable connection on Render
 });
 
 export default socket;
