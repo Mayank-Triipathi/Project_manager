@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, AlertCircle, Loader, Moon, Sun, KeyRound } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Lock, ArrowRight, CheckCircle, AlertCircle, Loader, Moon, Sun, KeyRound } from 'lucide-react';
+
 const API = import.meta.env.VITE_API_BASE_URL;
 
 const Input = ({ icon: Icon, label, type = "text", value, onChange, error, ...props }) => {
@@ -103,103 +104,6 @@ const Alert = ({ type, message, onClose }) => {
   );
 };
 
-const OTPInput = ({ length = 6, value, onChange }) => {
-  const inputs = useRef([]);
-  
-  const handleChange = (index, val) => {
-    if (!/^\d*$/.test(val)) return;
-    
-    const newOtp = value.split('');
-    newOtp[index] = val;
-    onChange(newOtp.join(''));
-    
-    if (val && index < length - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-  };
-  
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !value[index] && index > 0) {
-      inputs.current[index - 1]?.focus();
-    }
-  };
-  
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, length);
-    if (/^\d+$/.test(pastedData)) {
-      onChange(pastedData);
-      inputs.current[Math.min(pastedData.length, length - 1)]?.focus();
-    }
-  };
-  
-  return (
-    <div className="flex gap-3 justify-center">
-      {Array.from({ length }).map((_, i) => (
-        <input
-          key={i}
-          ref={el => inputs.current[i] = el}
-          type="text"
-          maxLength={1}
-          value={value[i] || ''}
-          onChange={e => handleChange(i, e.target.value)}
-          onKeyDown={e => handleKeyDown(i, e)}
-          onPaste={handlePaste}
-          className="w-14 h-16 text-center text-2xl font-bold bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm
-            border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all duration-300
-            focus:border-indigo-500 focus:shadow-lg focus:shadow-indigo-100 dark:focus:shadow-indigo-900/30 focus:scale-110
-            outline-none text-gray-900 dark:text-white"
-        />
-      ))}
-    </div>
-  );
-};
-
-const ProgressIndicator = ({ currentStep, darkMode }) => {
-  const steps = [
-    { number: 1, label: 'Email' },
-    { number: 2, label: 'Verify' },
-    { number: 3, label: 'Reset' }
-  ];
-  
-  return (
-    <div className="flex items-center justify-center mb-8">
-      {steps.map((step, index) => (
-        <React.Fragment key={step.number}>
-          <div className="flex flex-col items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold
-              transition-all duration-500 transform
-              ${currentStep >= step.number 
-                ? 'bg-gradient-to-br from-indigo-600 to-indigo-700 text-white scale-110 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50' 
-                : darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
-              }`}>
-              {currentStep > step.number ? (
-                <CheckCircle size={20} />
-              ) : (
-                step.number
-              )}
-            </div>
-            <span className={`text-xs mt-2 font-medium transition-colors duration-300
-              ${currentStep >= step.number 
-                ? darkMode ? 'text-indigo-400' : 'text-indigo-600' 
-                : darkMode ? 'text-gray-500' : 'text-gray-400'
-              }`}>
-              {step.label}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <div className={`w-16 h-1 mx-2 rounded-full transition-all duration-500
-              ${currentStep > step.number 
-                ? 'bg-gradient-to-r from-indigo-600 to-indigo-700' 
-                : darkMode ? 'bg-gray-700' : 'bg-gray-200'
-              }`} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  );
-};
-
 const PasswordStrengthIndicator = ({ password, darkMode }) => {
   const getStrength = () => {
     let strength = 0;
@@ -242,14 +146,11 @@ const PasswordStrengthIndicator = ({ password, darkMode }) => {
   );
 };
 
-export default function ForgotPasswordFlow() {
+export default function ForgotPasswordPage() {
   const [darkMode, setDarkMode] = useState(false);
-  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [resetToken, setResetToken] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -263,11 +164,6 @@ export default function ForgotPasswordFlow() {
       document.documentElement.classList.add('dark');
     }
   }, []);
-
-  useEffect(() => {
-    setAnimate(false);
-    setTimeout(() => setAnimate(true), 50);
-  }, [step]);
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
@@ -286,120 +182,45 @@ export default function ForgotPasswordFlow() {
     setTimeout(() => setAlert(null), 5000);
   };
 
-  const validateEmail = () => {
+  const validateForm = () => {
+    const newErrors = {};
+    
     if (!email.trim()) {
-      setErrors({ email: 'Email is required' });
-      return false;
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Invalid email format';
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setErrors({ email: 'Invalid email format' });
-      return false;
-    }
-    setErrors({});
-    return true;
-  };
-
-  const validateOTP = () => {
-    if (otp.length !== 6) {
-      setErrors({ otp: 'Please enter a valid 6-digit OTP' });
-      return false;
-    }
-    setErrors({});
-    return true;
-  };
-
-  const validatePassword = () => {
+    
     if (!newPassword) {
-      setErrors({ password: 'Password is required' });
-      return false;
+      newErrors.password = 'Password is required';
+    } else if (newPassword.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
-    if (newPassword.length < 8) {
-      setErrors({ password: 'Password must be at least 8 characters' });
-      return false;
-    }
-    setErrors({});
-    return true;
-  };
-
-  const handleSendOTP = async () => {
-    if (!validateEmail()) return;
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(`${API}/api/users/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showAlert('success', 'OTP sent to your email!');
-        setTimeout(() => setStep(2), 500);
-      } else {
-        showAlert('error', data.message || 'Failed to send OTP. Please try again.');
-      }
-    } catch (error) {
-      showAlert('error', 'Network error. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (!validateOTP()) return;
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(`${API}/api/users/forgot-password/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.resetToken) {
-        setResetToken(data.resetToken);
-        showAlert('success', 'OTP verified successfully!');
-        setTimeout(() => setStep(3), 500);
-      } else {
-        showAlert('error', data.message || 'Invalid OTP. Please try again.');
-      }
-    } catch (error) {
-      showAlert('error', 'Network error. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleResetPassword = async () => {
-    if (!validatePassword()) return;
+    if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      const response = await fetch(`${API}/api/users/forgot-password/reset`, {
+      const response = await fetch(`${API}/api/users/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ resetToken, newPassword }),
+        body: JSON.stringify({ email, newPassword }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        showAlert('success', 'Password reset successfully!');
+        showAlert('success', 'Password reset successfully! Redirecting to login...');
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = '/signin';
         }, 2000);
       } else {
         showAlert('error', data.message || 'Failed to reset password. Please try again.');
@@ -411,11 +232,6 @@ export default function ForgotPasswordFlow() {
     }
   };
 
-  const handleResendOTP = () => {
-    setOtp('');
-    handleSendOTP();
-  };
-
   return (
     <div className={`min-h-screen transition-colors duration-500 
       ${darkMode 
@@ -423,6 +239,7 @@ export default function ForgotPasswordFlow() {
         : 'bg-gradient-to-br from-indigo-50 via-white to-indigo-100'
       } flex items-center justify-center p-4 relative overflow-hidden`}>
       
+      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full 
           mix-blend-multiply filter blur-3xl opacity-30 animate-pulse
@@ -433,6 +250,7 @@ export default function ForgotPasswordFlow() {
           style={{ animationDelay: '1s' }}></div>
       </div>
 
+      {/* Dark Mode Toggle */}
       <button
         onClick={toggleDarkMode}
         className={`fixed top-6 right-6 p-3 rounded-2xl backdrop-blur-lg shadow-lg
@@ -463,6 +281,7 @@ export default function ForgotPasswordFlow() {
             }`}></div>
 
           <div className="relative z-10">
+            {/* Header */}
             <div className="text-center mb-8">
               <div className={`inline-flex items-center justify-center w-16 h-16 
                 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl mb-4
@@ -475,148 +294,71 @@ export default function ForgotPasswordFlow() {
                   ? 'from-indigo-400 to-indigo-600' 
                   : 'from-indigo-600 to-indigo-800'
                 }`}>
-                {step === 1 && 'Forgot Password'}
-                {step === 2 && 'Verify OTP'}
-                {step === 3 && 'Reset Password'}
+                Reset Password
               </h1>
               <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                {step === 1 && 'Enter your email to receive an OTP'}
-                {step === 2 && 'Enter the 6-digit code sent to your email'}
-                {step === 3 && 'Create a new strong password'}
+                Enter your email and new password
               </p>
             </div>
 
-            <ProgressIndicator currentStep={step} darkMode={darkMode} />
+            {/* Form */}
+            <div>
+              <Input
+                icon={Mail}
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={errors.email}
+              />
 
-            {step === 1 && (
-              <div className="animate-in fade-in slide-in-from-left duration-500">
+              <div className="relative">
                 <Input
-                  icon={Mail}
-                  label="Email Address"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  error={errors.email}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendOTP()}
+                  icon={Lock}
+                  label="New Password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  error={errors.password}
                 />
-
-                <Button loading={loading} onClick={handleSendOTP} icon={ArrowRight}>
-                  Send OTP
-                </Button>
-
                 <button
-                  onClick={() => window.location.href = '/login'}
-                  className={`w-full mt-4 text-sm font-medium transition-colors duration-300
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={`absolute right-4 top-4 transition-colors duration-300
                     ${darkMode 
-                      ? 'text-gray-400 hover:text-gray-200' 
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'text-gray-400 hover:text-indigo-400' 
+                      : 'text-gray-400 hover:text-indigo-600'
                     }`}
                 >
-                  ← Back to login
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
               </div>
-            )}
 
-            {step === 2 && (
-              <div className="animate-in fade-in slide-in-from-right duration-500">
-                <div className="mb-2">
-                  <p className={`text-sm text-center mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Code sent to <span className="font-semibold text-indigo-600 dark:text-indigo-400">{email}</span>
-                  </p>
-                </div>
+              <PasswordStrengthIndicator password={newPassword} darkMode={darkMode} />
 
-                <div className="mb-6">
-                  <OTPInput value={otp} onChange={setOtp} />
-                  {errors.otp && (
-                    <p className="text-red-500 dark:text-red-400 text-sm mt-2 text-center flex items-center justify-center gap-1">
-                      <AlertCircle size={14} />
-                      {errors.otp}
-                    </p>
-                  )}
-                </div>
+              <Button loading={loading} onClick={handleResetPassword} icon={CheckCircle}>
+                Reset Password
+              </Button>
 
-                <Button loading={loading} onClick={handleVerifyOTP} icon={ArrowRight}>
-                  Verify OTP
-                </Button>
-
-                <div className="flex items-center justify-between mt-4">
-                  <button
-                    onClick={() => setStep(1)}
-                    className={`text-sm font-medium transition-colors duration-300 flex items-center gap-1
-                      ${darkMode 
-                        ? 'text-gray-400 hover:text-gray-200' 
-                        : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                  >
-                    <ArrowLeft size={16} />
-                    Back
-                  </button>
-                  <button
-                    onClick={handleResendOTP}
-                    disabled={loading}
-                    className={`text-sm font-medium transition-colors duration-300
-                      ${darkMode 
-                        ? 'text-indigo-400 hover:text-indigo-300' 
-                        : 'text-indigo-600 hover:text-indigo-800'
-                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    Resend OTP
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="animate-in fade-in slide-in-from-right duration-500">
-                <div className="relative mb-6">
-                  <Input
-                    icon={Lock}
-                    label="New Password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    error={errors.password}
-                    onKeyPress={(e) => e.key === 'Enter' && handleResetPassword()}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute right-4 top-4 transition-colors duration-300
-                      ${darkMode 
-                        ? 'text-gray-400 hover:text-indigo-400' 
-                        : 'text-gray-400 hover:text-indigo-600'
-                      }`}
-                  >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
-                  </button>
-                </div>
-
-                <PasswordStrengthIndicator password={newPassword} darkMode={darkMode} />
-
-                <Button loading={loading} onClick={handleResetPassword} icon={CheckCircle}>
-                  Reset Password
-                </Button>
-
-                <button
-                  onClick={() => setStep(2)}
-                  className={`w-full mt-4 text-sm font-medium transition-colors duration-300 flex items-center justify-center gap-1
-                    ${darkMode 
-                      ? 'text-gray-400 hover:text-gray-200' 
-                      : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  <ArrowLeft size={16} />
-                  Back
-                </button>
-              </div>
-            )}
+              <button
+                onClick={() => window.location.href = '/signin'}
+                className={`w-full mt-4 text-sm font-medium transition-colors duration-300
+                  ${darkMode 
+                    ? 'text-gray-400 hover:text-gray-200' 
+                    : 'text-gray-600 hover:text-gray-900'
+                  }`}
+              >
+                ← Back to login
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* Footer Link */}
         <div className="text-center mt-6">
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Remember your password?{' '}
-            <a href="/login" className={`font-semibold transition-colors duration-300 hover:underline
+            <a href="/signin" className={`font-semibold transition-colors duration-300 hover:underline
               ${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'}`}>
               Sign in
             </a>

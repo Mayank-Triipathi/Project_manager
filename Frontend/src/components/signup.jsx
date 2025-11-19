@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Mail, User, UserCircle, ArrowRight, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, User, UserCircle, ArrowRight, CheckCircle, AlertCircle, Loader, Lock } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
-import { Lock } from 'lucide-react';
 import Navbar from "./navbar.jsx"
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -103,79 +102,20 @@ const Alert = ({ type, message, onClose }) => {
   );
 };
 
-// OTP Input Component
-const OTPInput = ({ length = 6, value, onChange }) => {
-  const inputs = useRef([]);
-  
-  const handleChange = (index, val) => {
-    if (!/^\d*$/.test(val)) return;
-    
-    const newOtp = value.split('');
-    newOtp[index] = val;
-    onChange(newOtp.join(''));
-    
-    if (val && index < length - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-  };
-  
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !value[index] && index > 0) {
-      inputs.current[index - 1]?.focus();
-    }
-  };
-  
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, length);
-    if (/^\d+$/.test(pastedData)) {
-      onChange(pastedData);
-      inputs.current[Math.min(pastedData.length, length - 1)]?.focus();
-    }
-  };
-  
-  return (
-    <div className="flex gap-3 justify-center">
-      {Array.from({ length }).map((_, i) => (
-        <input
-          key={i}
-          ref={el => inputs.current[i] = el}
-          type="text"
-          maxLength={1}
-          value={value[i] || ''}
-          onChange={e => handleChange(i, e.target.value)}
-          onKeyDown={e => handleKeyDown(i, e)}
-          onPaste={handlePaste}
-          className="w-14 h-16 text-center text-2xl font-bold bg-white/70 backdrop-blur-sm
-            border-2 border-gray-200 rounded-2xl transition-all duration-300
-            focus:border-indigo-500 focus:shadow-lg focus:shadow-indigo-100 focus:scale-110
-            outline-none"
-        />
-      ))}
-    </div>
-  );
-};
-
-
-
-// Main App Component
+// Main Signup Component
 export default function SignupPage() {
-  const [step, setStep] = useState('signup'); // 'signup' or 'otp'
   const [formData, setFormData] = useState({
     fullname: '',
     username: '',
-    email: ''
+    email: '',
+    password: ''
   });
-  const [otp, setOtp] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
   const [animate, setAnimate] = useState(false);
   const navigate = useNavigate();
-  const [resetToken, setResetToken] = useState('');
-  const [password, setPassword] = useState('');
 
-  
   useEffect(() => {
     setAnimate(true);
   }, []);
@@ -204,6 +144,12 @@ export default function SignupPage() {
       newErrors.email = 'Invalid email format';
     }
     
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -212,87 +158,24 @@ export default function SignupPage() {
     if (!validateForm()) return;
     
     setLoading(true);
-    console.log('Submitting formData:', formData);
-
     
     try {
-          const response = await fetch(`${API}/api/users/signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
+      const response = await fetch(`${API}/api/users/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
       
       const data = await response.json();
       
       if (response.ok) {
-        showAlert('success', 'OTP sent to your email!');
-        setTimeout(() => setStep('otp'), 500);
+        showAlert('success', 'Account created successfully! Redirecting to sign in...');
+        setTimeout(() => navigate('/signin'), 1500);
       } else {
         showAlert('error', data.error || 'Signup failed. Please try again.');
       }
     } catch (error) {
-      showAlert('error', 'Network error. Please check your connection.',error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleVerifyOTP = async () => {
-    if (otp.length !== 6) {
-      showAlert('error', 'Please enter a valid 6-digit OTP');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const response = await fetch(`${API}/api/users/verify-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: formData.email, otp }),
-    });
-
-      
-      const data = await response.json();
-      
-  if (response.ok) {
-    setResetToken(data.resetToken); // <- this must exist
-    setStep('setPassword');
-  }
-  else {
-          showAlert('error', data.message || 'Invalid OTP. Please try again.');
-        }
-    } catch (error) {
       showAlert('error', 'Network error. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleSetPassword = async () => {
-    if (!password) {
-      showAlert('error', 'Password cannot be empty');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`${API}/api/users/set-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, resetToken }) // pass the OTP token from verify step
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showAlert('success', 'Password set successfully! Redirecting to sign in...');
-        setTimeout(() => navigate('/signin'), 1500);
-      } else {
-        showAlert('error', data.error || 'Failed to set password');
-      }
-    } catch (err) {
-      showAlert('error', 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -327,132 +210,60 @@ export default function SignupPage() {
             pointer-events-none"></div>
           
           <div className="relative z-10">
-            {step === 'signup' ? (
-              <div className={`transition-all duration-500 ${step === 'signup' ? 'animate-in fade-in slide-in-from-left' : ''}`}>
-                {/* Header */}
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 
-                    bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl mb-4
-                    shadow-lg shadow-indigo-200 transform hover:rotate-6 transition-transform duration-300">
-                    <UserCircle className="text-white" size={32} />
-                  </div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 
-                    bg-clip-text text-transparent mb-2">
-                    Create Account
-                  </h1>
-                  <p className="text-gray-600">Join us and get started in seconds</p>
-                </div>
-                
-                {/* Form */}
-                <form onSubmit={(e) => { e.preventDefault(); handleSignup(); }}>
-                  <Input
-                    icon={User}
-                    label="Full Name"
-                    value={formData.fullname}
-                    onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
-                    error={errors.fullname}
-                  />
-                  
-                  <Input
-                    icon={UserCircle}
-                    label="Username"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    error={errors.username}
-                  />
-                  
-                  <Input
-                    icon={Mail}
-                    label="Email Address"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    error={errors.email}
-                  />
-                  
-                  <Button loading={loading}>
-                    Continue
-                  </Button>
-                </form>
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 
+                bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl mb-4
+                shadow-lg shadow-indigo-200 transform hover:rotate-6 transition-transform duration-300">
+                <UserCircle className="text-white" size={32} />
               </div>
-            ) : (
-              <div className="animate-in fade-in slide-in-from-right duration-500">
-                {/* OTP Header */}
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 
-                    bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl mb-4
-                    shadow-lg shadow-indigo-200">
-                    <Mail className="text-white" size={32} />
-                  </div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 
-                    bg-clip-text text-transparent mb-2">
-                    Verify Email
-                  </h1>
-                  <p className="text-gray-600">
-                    Enter the 6-digit code sent to<br />
-                    <span className="font-semibold text-indigo-600">{formData.email}</span>
-                  </p>
-                </div>
-                
-                {/* OTP Input */}
-                <div className="mb-8">
-                  <OTPInput value={otp} onChange={setOtp} />
-                </div>
-                
-                <Button loading={loading} onClick={handleVerifyOTP}>
-                  Verify OTP
-                </Button>
-                
-                <button
-                  onClick={() => setStep('signup')}
-                  className="w-full mt-4 text-sm text-gray-600 hover:text-indigo-600 
-                    transition-colors duration-300"
-                >
-                  ← Back to signup
-                </button>
-                
-                <button
-                  onClick={handleSignup}
-                  disabled={loading}
-                  className="w-full mt-2 text-sm text-indigo-600 hover:text-indigo-800 
-                    transition-colors duration-300 font-medium"
-                >
-                  Resend OTP
-                </button>
-              </div>
-            )}
-            {step === 'setPassword' && (
-              <div className="animate-in fade-in slide-in-from-right duration-500">
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 
-                    bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl mb-4
-                    shadow-lg shadow-indigo-200">
-                    <Lock className="text-white" size={32} />
-                  </div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 
-                    bg-clip-text text-transparent mb-2">
-                    Set Password
-                  </h1>
-                  <p className="text-gray-600">
-                    Choose a strong password for <br />
-                    <span className="font-semibold text-indigo-600">{formData.email}</span>
-                  </p>
-                </div>
-
-                <Input
-                  icon={Lock}
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-
-                <Button loading={loading} onClick={handleSetPassword}>
-                  Set Password
-                </Button>
-              </div>
-            )}
-
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 
+                bg-clip-text text-transparent mb-2">
+                Create Account
+              </h1>
+              <p className="text-gray-600">Join us and get started in seconds</p>
+            </div>
+            
+            {/* Form Fields */}
+            <div>
+              <Input
+                icon={User}
+                label="Full Name"
+                value={formData.fullname}
+                onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+                error={errors.fullname}
+              />
+              
+              <Input
+                icon={UserCircle}
+                label="Username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                error={errors.username}
+              />
+              
+              <Input
+                icon={Mail}
+                label="Email Address"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                error={errors.email}
+              />
+              
+              <Input
+                icon={Lock}
+                label="Password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                error={errors.password}
+              />
+              
+              <Button loading={loading} onClick={handleSignup}>
+                Create Account
+              </Button>
+            </div>
             
             {/* Terms & Privacy */}
             <div className="mt-8 text-center">
@@ -477,17 +288,15 @@ export default function SignupPage() {
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
             <Link
-                  to="/signin"
-                  className="text-indigo-600 hover:text-indigo-800 font-semibold
-                    transition-colors duration-300 hover:underline">
-                  Sign in
+              to="/signin"
+              className="text-indigo-600 hover:text-indigo-800 font-semibold
+                transition-colors duration-300 hover:underline">
+              Sign in
             </Link>
-
           </p>
         </div>
       </div>
     </div>
     </>
   );
-
 }

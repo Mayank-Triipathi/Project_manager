@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const { User } = require("../models/userSchema");
 const { setuser } = require("../services/auth");
-const { OTP } = require("../models/otpSchema");
-const { sendOtp } = require("../utils/sendotp");
+
+// const { OTP } = require("../models/otpSchema");
+// const { sendOtp } = require("../utils/sendotp");
+
 const router = Router();
 const jwt = require("jsonwebtoken");
 const { requireAuth } = require("../middlewares/auth");
@@ -18,11 +20,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+
+// =========================
+// SIGNUP (NO OTP REQUIRED)
+// =========================
+
 router.post("/signup", async (req, res) => {
   try {
-    const { fullname, username, email } = req.body;
+    const { fullname, username, email, password } = req.body;
 
-    if (!fullname || !username || !email) {
+    if (!fullname || !username || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -31,66 +38,21 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ error: "Email already registered" });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // ❌ OTP LOGIC REMOVED
+    // const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // await OTP.findOneAndUpdate(
+    //   { email }, { fullname, username, email, otp, createdAt: new Date() },
+    //   { upsert: true, new: true }
+    // );
+    // await sendOtp(email, otp);
 
-    await OTP.findOneAndUpdate(
-  { email },
-  { fullname, username, email, otp, createdAt: new Date() },
-  { upsert: true, new: true }
-);
-
-
-    await sendOtp(email, otp);
-
-    res.json({ success: true, message: "OTP sent to your email" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Signup failed" });
-  }
-});
-
-router.post("/verify-otp", async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    const otpRecord = await OTP.findOne({ email, otp });
-    if (!otpRecord) {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
-    }
-    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
-    res.json({ success: true, message: "OTP verified. Please set your password now.", resetToken });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "OTP verification failed" });
-  }
-});
-
-router.post("/set-password", async (req, res) => {
-  try {
-    const { password, resetToken } = req.body;
-
-    if (!resetToken) {
-      return res.status(400).json({ error: "JWT must be provided" });
-    }
-
-    console.log("Received resetToken:", resetToken);
-    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
-    console.log("Decoded token:", decoded);
-    const otpRecord = await OTP.findOne({ email: decoded.email });
-    console.log("Found OTP record:", otpRecord);
-
-    if (!otpRecord) {
-      return res.status(400).json({ error: "No OTP record found. Please signup again." });
-    }
-
+    // DIRECTLY CREATE USER
     const user = await User.create({
-      fullname: otpRecord.fullname,
-      username: otpRecord.username,
-      email: otpRecord.email,
+      fullname,
+      username,
+      email,
       password
     });
-
-    await OTP.deleteMany({ email: otpRecord.email });
 
     const token = setuser(user);
 
@@ -99,13 +61,35 @@ router.post("/set-password", async (req, res) => {
     delete safeUser.salt;
 
     res.json({ success: true, token, user: safeUser });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Password setup failed" });
+    res.status(500).json({ error: "Signup failed" });
   }
 });
 
 
+// =========================
+// REMOVE OTP VERIFY ROUTE
+// =========================
+
+// router.post("/verify-otp", async (req, res) => {
+//   return res.status(400).json({ error: "OTP system disabled" });
+// });
+
+
+// =========================
+// REMOVE OTP SET-PASSWORD
+// =========================
+
+// router.post("/set-password", async (req, res) => {
+//   return res.status(400).json({ error: "OTP system disabled" });
+// });
+
+
+// =========================
+// LOGIN
+// =========================
 
 router.post("/login", async (req, res) => {
   try {
@@ -114,7 +98,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password required" });
     }
 
-    const token = await User.matchuserandgettoken(email,password);
+    const token = await User.matchuserandgettoken(email, password);
     const user = await User.findOne({ email }).select("-password -salt");
 
     res.json({ success: true, token, user });
@@ -123,86 +107,42 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
+// =========================
+// FORGOT PASSWORD (NO OTP)
+// =========================
+
 router.post("/forgot-password", async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, newPassword } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+    if (!email || !newPassword) {
+      return res.status(400).json({ error: "Email & new password required" });
     }
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    await OTP.findOneAndUpdate(
-  { email },
-  { email, otp, createdAt: new Date() },
-  { upsert: true, new: true }
-);
-
-
-    await sendOtp(email, otp);
-
-    res.json({ success: true, message: "OTP sent to your email" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to send OTP" });
-  }
-});
-
-router.post("/forgot-password/verify-otp", async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({ error: "Email and OTP are required" });
-    }
-
-    const otpRecord = await OTP.findOne({ email, otp });
-    if (!otpRecord) {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
-    }
-
-    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
-
-    res.json({ success: true, message: "OTP verified. You can reset your password.", resetToken });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "OTP verification failed" });
-  }
-});
-
-router.post("/forgot-password/reset", async (req, res) => {
-  try {
-    const { resetToken, newPassword } = req.body;
-
-    if (!resetToken || !newPassword) {
-      return res.status(400).json({ error: "Reset token and new password are required" });
-    }
-
-    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
-    const user = await User.findOne({ email: decoded.email });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
+    // ❌ NO OTP — DIRECT RESET
     user.password = newPassword;
     await user.save();
 
-    await OTP.deleteMany({ email: decoded.email });
-
     res.json({ success: true, message: "Password reset successfully" });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Password reset failed" });
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 
-// Profile & User Management
+// REMOVE OTP VERIFY FOR FORGOT PASSWORD
+// router.post("/forgot-password/verify-otp", async () => {});
+// router.post("/forgot-password/reset", async () => {});
+
+
+// =========================
+// USER PROFILE
+// =========================
 
 router.get("/me", requireAuth("token"), async (req, res) => {
   try {
@@ -230,9 +170,16 @@ router.put("/update-profile", requireAuth("token"), async (req, res) => {
 
     await user.save();
 
-    res.json({ success: true, message: "Profile updated successfully", user: { fullname: user.fullname, username: user.username, email: user.email } });
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        fullname: user.fullname,
+        username: user.username,
+        email: user.email,
+      }
+    });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Profile update failed" });
   }
 });
@@ -278,14 +225,9 @@ router.post("/update-profile-pic", requireAuth("token"), upload.single("profileP
   }
 );
 
-// toke refresh and logout
-
-
-
 router.post("/logout", (req, res) => {
   res.clearCookie("token");
   res.json({ success: true, message: "Logged out successfully" });
 });
-
 
 module.exports = { router };
