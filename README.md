@@ -56,4 +56,61 @@ A full-stack Project Manager web application designed to help teams plan, track,
 
 ## 🌐 Live Demo
 
-🔗 https://projectmanager-frontend-kappa.vercel.app 
+🔗 **Live Application**:  
+https://projectmanager-frontend-kappa.vercel.app
+
+🔗 **Backend API**:  
+https://project-manager-9lc6.onrender.com
+
+> Replace the above links with your actual URLs.
+
+---
+
+## 📦 Installation & Setup (Local)
+
+### Prerequisites
+- Node.js
+- MongoDB
+- npm
+
+---
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/yourusername/project-manager.git
+cd project-manager
+2️⃣ Backend Setup
+cd backend
+npm install
+Create a .env file:
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+Run backend:
+npm start
+3️⃣ Frontend Setup
+cd frontend
+npm install
+npm start
+🔐 Authentication
+JWT-based authentication
+Secure access to projects, tasks, and chat features
+📌 Deployment
+Frontend hosted on Vercel
+Backend hosted on Render
+Database hosted on MongoDB Atlas
+🧩 Future Enhancements
+File sharing within real-time chat
+Notifications for task updates
+Role-based access control (Admin / Member)
+Performance optimizations
+UI/UX enhancements
+🤝 Contributing
+Contributions are welcome!
+Feel free to fork this repository and submit a pull request.
+📄 License
+This project is for learning and portfolio purposes.
+👨‍💻 Author
+Mayank Tripathi
+B.Tech CSE
+Backend & Full-Stack Developer
