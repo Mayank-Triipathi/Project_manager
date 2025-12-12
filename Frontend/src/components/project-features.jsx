@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { CheckCircle, Users, BarChart3, Layout, Database, Zap } from 'lucide-react';
-import Navbar from './navbar';
-import {Link} from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { CheckCircle, Users, BarChart3, Layout, Database, Zap, MessageCircle } from 'lucide-react';
+
 export default function FeaturesPage() {
   const [visibleCards, setVisibleCards] = useState([]);
 
@@ -36,6 +35,12 @@ export default function FeaturesPage() {
       color: "from-green-500 to-emerald-500"
     },
     {
+      icon: MessageCircle,
+      title: "Real-time Chat",
+      description: "Communicate instantly with your team through built-in real-time messaging. Stay connected and resolve issues faster.",
+      color: "from-cyan-500 to-blue-500"
+    },
+    {
       icon: BarChart3,
       title: "Dashboard & Analytics",
       description: "Visualize your progress with intuitive charts and graphs. Get insights into project timelines and task completion rates.",
@@ -56,8 +61,6 @@ export default function FeaturesPage() {
   ];
 
   return (
-    <>
-    <Navbar/>
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -125,11 +128,9 @@ export default function FeaturesPage() {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join thousands of teams already managing their projects more efficiently
           </p>
-          <Link to="/login">
           <button className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transform hover:scale-110 transition-all duration-300 shadow-2xl">
             Start Free Trial
           </button>
-          </Link>
         </div>
       </div>
 
@@ -154,6 +155,5 @@ export default function FeaturesPage() {
         }
       `}</style>
     </div>
-    </>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Paperclip, FileText, CheckCheck, Check, Users, ArrowLeft, MessageCircle } from 'lucide-react';
+import { Send, CheckCheck, Check, Users, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -10,11 +10,9 @@ const Chat = ({ socket }) => {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [uploadingFile, setUploadingFile] = useState(false);
   const [timeoutError, setTimeoutError] = useState(false);
   const [error, setError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const firstUnreadRef = useRef(null);
   const hasScrolledToUnread = useRef(false);
@@ -252,40 +250,6 @@ const Chat = ({ socket }) => {
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      setUploadingFile(true);
-      const response = await fetch(
-        `${API}/api/chats/${chatId}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to upload file');
-
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Failed to upload file');
-    } finally {
-      setUploadingFile(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -304,33 +268,6 @@ const Chat = ({ socket }) => {
     
     const otherParticipant = chat.participants?.find(p => p._id !== userId);
     return otherParticipant?.fullname || 'Chat';
-  };
-
-  const renderAttachment = (attachment) => {
-    const isImage = attachment.fileType?.startsWith('image/');
-    
-    if (isImage) {
-      return (
-        <img
-          src={attachment.url}
-          alt={attachment.filename}
-          className="max-w-xs max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition"
-          onClick={() => window.open(attachment.url, '_blank')}
-        />
-      );
-    }
-    
-    return (
-      <a
-        href={attachment.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-      >
-        <FileText className="w-5 h-5 text-gray-600" />
-        <span className="text-sm text-gray-700">{attachment.filename}</span>
-      </a>
-    );
   };
 
   if (loading) {
@@ -487,16 +424,6 @@ const Chat = ({ socket }) => {
                             </p>
                           )}
                           
-                          {message.attachments && message.attachments.length > 0 && (
-                            <div className="mt-2 space-y-2">
-                              {message.attachments.map((attachment, i) => (
-                                <div key={i}>
-                                  {renderAttachment(attachment)}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          
                           <div className={`flex items-center gap-2 mt-2 text-xs ${
                             isOwn ? 'text-indigo-200' : 'text-gray-500'
                           }`}>
@@ -532,32 +459,7 @@ const Chat = ({ socket }) => {
       {/* Input Area */}
       <div className="bg-white border-t border-gray-200 shadow-lg">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          {uploadingFile && (
-            <div className="mb-3 text-sm text-gray-600 flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-              Uploading file...
-            </div>
-          )}
-          
           <div className="flex items-end gap-3">
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleFileUpload}
-              accept="image/*,.pdf,.doc,.docx"
-              className="hidden"
-            />
-            
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingFile}
-              className="p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition disabled:opacity-50 flex-shrink-0"
-              title="Attach file"
-            >
-              <Paperclip className="w-5 h-5" />
-            </button>
-            
             <div className="flex-1 bg-gray-100 rounded-2xl px-5 py-3">
               <textarea
                 value={messageText}
