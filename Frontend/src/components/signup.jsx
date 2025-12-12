@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, User, UserCircle, ArrowRight, CheckCircle, AlertCircle, Loader, Lock } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./navbar.jsx"
+import socket from '@/socket.js';
 const API = import.meta.env.VITE_API_BASE_URL;
 
 // Reusable Input Component
@@ -170,7 +171,11 @@ export default function SignupPage() {
       
       if (response.ok) {
         showAlert('success', 'Account created successfully! Redirecting to sign in...');
-        setTimeout(() => navigate('/signin'), 1500);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem("userId", data.user._id);
+        localStorage.setItem("userName", data.user.fullname);
+        socket.connect()
+        setTimeout(() => navigate('/dashboard'), 1500);
       } else {
         showAlert('error', data.error || 'Signup failed. Please try again.');
       }
