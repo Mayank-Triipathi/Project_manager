@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const { User } = require("../models/userSchema");
 const { setuser } = require("../services/auth");
+const {RegisterValidation,LoginValidation} = require("../Validators/userValidator");
 
 // const { OTP } = require("../models/otpSchema");
 // const { sendOtp } = require("../utils/sendotp");
@@ -27,7 +28,12 @@ const upload = multer({ storage });
 
 router.post("/signup", async (req, res) => {
   try {
-    const { fullname, username, email, password } = req.body;
+    // const { fullname, username, email, password } = req.body;
+    const {data, error} = RegisterValidation.safeParse(req.body);
+    if(error){
+      return  res.status(400).json({ error: error.errors.map(e=>e.message).join(", ") });
+    }
+    const { fullname, username, email, password } = data;
 
     if (!fullname || !username || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
@@ -93,7 +99,12 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
+    const {data, error} = LoginValidation.safeParse(req.body);
+    if(error){
+      return  res.status(400).json({ error: error.errors.map(e=>e.message).join(", ") });
+    }
+    const { email, password } = data;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
     }
