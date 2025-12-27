@@ -1,4 +1,4 @@
-const { z } = required("zod")
+const { z } = require("zod");
 
 const LoginValidation = z.object({
     email: z.string().email(),
